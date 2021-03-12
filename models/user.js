@@ -2,8 +2,7 @@ const mongoose = require('mongoose')
 const uniqueValidator = require('mongoose-unique-validator')
 const crypto = require('crypto')
 const jsonwebtoken =  require('jsonwebtoken')
-// TODO: use env variable
-const secret = crypto.randomBytes(16).toString('hex')
+const secret = require('../config/secret').secret
 
 const UserSchema = new mongoose.Schema({
   username: {type: String, lowercase: true, unique: true, required: [true, 'cannot be blank'], match: [/^[a-zA-Z0-9]+$/, 'is invalid'], index: true},
