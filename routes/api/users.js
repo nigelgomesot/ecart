@@ -61,9 +61,6 @@ router.put('/user', auth.required, (req, res, next) => {
     if (typeof req.body.user.email !== 'undefined')
       user.email = req.body.user.email
 
-    if (typeof req.body.user.role !== 'undefined')
-      user.role = req.body.user.role
-
     if (typeof req.body.user.password !== 'undefined')
       user.setPassword(req.body.user.password)
 
