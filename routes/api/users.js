@@ -48,4 +48,29 @@ router.get('/user', auth.required, (req, res, next) => {
   }).catch(next)
 })
 
+
+// update user
+router.put('/user', auth.required, (req, res, next) => {
+  User.findById(req.payload.id).then(user => {
+    if (!user)
+      return res.sendStatus(401)
+
+    if (typeof req.body.user.username !== 'undefined')
+      user.username = req.body.user.username
+
+    if (typeof req.body.user.email !== 'undefined')
+      user.email = req.body.user.email
+
+    if (typeof req.body.user.role !== 'undefined')
+      user.role = req.body.user.role
+
+    if (typeof req.body.user.password !== 'undefined')
+      user.setPassword(req.body.user.password)
+
+    user.save().then(() => {
+      return res.json({user: user.toAuthJSON()})
+    })
+  }).catch(next)
+})
+
 module.exports = router
