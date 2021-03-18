@@ -12,6 +12,7 @@ app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json())
 
 require('./models/user')
+require('./models/product')
 require('./config/passport')
 app.use(require('./routes'))
 
