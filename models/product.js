@@ -12,15 +12,27 @@ const ProductSchema = new mongoose.Schema({
 
 ProductSchema.plugin(uniqueValidator, {message: 'is already taken'})
 
-ProductSchema.methods.slugify = () => {
+ProductSchema.methods.slugify = function() {
   this.slug = this.sku + '-' + slug(this.title)
 }
 
-ProductSchema.pre('validate', (next) => {
+ProductSchema.pre('validate', function(next) {
   if (!this.slug)
     this.slugify()
 
   next()
 })
+
+ProductSchema.methods.toJSONFor = function(user) {
+  return {
+    slug: this.slug,
+    sku: this.sku,
+    title: this.title,
+    description: this.description,
+    categoryList: this.categoryList,
+    createdAt: this.createdAt,
+    updatedAt: this.updatedAt
+  }
+}
 
 mongoose.model('Product', ProductSchema)
