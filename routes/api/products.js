@@ -48,4 +48,24 @@ router.get('/:product', auth.optional, (req, res, next) => {
   }).catch(next)
 })
 
+// update product
+router.put('/:product', auth.required, (req, res, next) => {
+
+  // TODO: save last modified by
+  User.findById(req.payload.id).then(user => {
+    if (!user)
+      return res.sendStatus(401)
+
+    if (typeof req.body.product.title != 'undefined')
+      req.product.title = req.body.product.title
+
+    if (typeof req.body.product.description != 'undefined')
+      req.product.description = req.body.product.description
+
+    req.product.save().then(() => {
+      return res.json({product: req.product.toJSONFor(user)})
+    }).catch(next)
+  })
+})
+
 module.exports = router
