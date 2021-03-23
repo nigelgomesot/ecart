@@ -68,4 +68,16 @@ router.put('/:product', auth.required, (req, res, next) => {
   })
 })
 
+// delete product
+router.delete('/:product', auth.required, (req, res, next) => {
+  User.findById(req.payload.id).then(user => {
+    if (!user)
+      return res.sendStatus(401)
+
+    return req.product.remove().then(() => {
+      return res.sendStatus(204)
+    }).catch(next)
+  })
+})
+
 module.exports = router
