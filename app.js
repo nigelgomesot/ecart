@@ -13,6 +13,8 @@ app.use(bodyParser.json())
 
 require('./models/user')
 require('./models/product')
+require('./models/cart_item')
+require('./models/cart')
 require('./config/passport')
 app.use(require('./routes'))
 
