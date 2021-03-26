@@ -19,7 +19,7 @@ CartSchema.pre('validate', function(next) {
 CartSchema.methods.toJSON = function() {
   return {
     items: this.items,
-    customer: this.customer,
+    customer: this.customer.toProfileJSON(),
     status: this.status
   }
 }

@@ -42,6 +42,12 @@ UserSchema.methods.toAuthJSON = function() {
   }
 }
 
+UserSchema.methods.toProfileJSON = function() {
+  return {
+    username: this.username
+  }
+}
+
 UserSchema.plugin(uniqueValidator, {message: 'is already taken'})
 
 mongoose.model('User', UserSchema)
