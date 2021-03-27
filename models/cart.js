@@ -18,6 +18,7 @@ CartSchema.pre('validate', function(next) {
 // TODO: use toProfileJSON for customer
 CartSchema.methods.toJSON = function() {
   return {
+    id: this._id,
     items: this.items,
     customer: this.customer.toProfileJSON(),
     status: this.status
