@@ -4,6 +4,9 @@ const mongoose = require('mongoose')
 
 const User = mongoose.model('User')
 const Cart = mongoose.model('Cart')
+const CartItem = mongoose.model('CartItem')
+const Product = mongoose.model('Product')
+
 const auth = require('../auth')
 
 // create cart
@@ -22,7 +25,7 @@ router.post('/', auth.required, (req, res, next) => {
 })
 
 router.param('cartId', (req, res, next, cartId) => {
-  Cart.findById(cartId).then(cart => {
+  Cart.findById(cartId).populate('customer').then(cart => {
     if (!cart)
       return res.sendStatus(404)
 
@@ -41,7 +44,24 @@ router.put('/:cartId/addProduct', auth.required, (req, res, next) => {
     if (req.cart.customer._id.toString() != user._id.toString())
       return res.sendStatus(403)
 
-      return res.json({status: 'success'})
+    Product.findOne({slug: req.body.product.slug}).then(product => {
+      if (!product)
+        return res.sendStatus(404)
+
+      const cartItem = new CartItem({
+        product: product,
+        quantity: req.body.product.quantity
+      })
+
+      req.cart.items.push(cartItem)
+
+      req.cart.save().then(() => {
+        return res.json({
+          status: 'success',
+          cart: req.cart.toJSON()
+        })
+      }).catch(next)
+    }).catch(next)
   }).catch(next)
 })
 
