@@ -44,13 +44,33 @@ router.put('/:cartId/addProduct', auth.required, (req, res, next) => {
     if (req.cart.customer._id.toString() != user._id.toString())
       return res.sendStatus(403)
 
-    Product.findOne({slug: req.body.product.slug}).then(product => {
+    const reqProduct = req.body.product
+    const existingCartItemIds = req.cart.items
+
+    // PENDING: return 409 if existing cartItem
+    console.log('>>>>>>> existingCartItemIds',existingCartItemIds)
+
+    if (existingCartItemIds) {
+      CartItem.find({'_id': existingCartItemIds}).then(cartItems => {
+        console.log('cartItems', cartItems)
+      })
+      // for (existingCartItemId of existingCartItemsIds) {
+
+      //   CartItem.findById(existingCartItemId).populate('product').then(existingCartItem => {
+      //     console.log('>>>>>>> existingCartItem',existingCartItem)
+      //     if (existingCartItem.product.slug === reqProduct.slug)
+      //       return res.sendStatus(409)
+      //   })
+      // }
+    }
+
+    Product.findOne({slug: reqProduct.slug}).then(product => {
       if (!product)
         return res.sendStatus(404)
 
       const cartItem = new CartItem({
         product: product,
-        quantity: req.body.product.quantity
+        quantity: reqProduct.quantity
       })
 
       req.cart.items.push(cartItem)
