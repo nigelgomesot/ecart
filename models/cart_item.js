@@ -8,6 +8,7 @@ const CartItemSchema = new mongoose.Schema({
 // TODO: Use toJSONFor for product
 CartItemSchema.methods.toJSON = function() {
   return {
+    id: this._id,
     product: this.product,
     quantity: this.quantity
   }

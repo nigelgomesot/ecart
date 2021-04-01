@@ -45,15 +45,14 @@ router.put('/:cartId/addProduct', auth.required, (req, res, next) => {
       return res.sendStatus(403)
 
     const reqProduct = req.body.product
-    const existingCartItemIds = req.cart.items
 
-    // PENDING: return 409 if existing cartItem
-    console.log('>>>>>>> existingCartItemIds',existingCartItemIds)
+    console.log('req.payload.id', req.payload.id)
+    CartItem.findById('60638b5ea2af92a28ca7579d').then(ci => {console.log('ci', ci)})
 
-    if (existingCartItemIds) {
-      CartItem.find({'_id': existingCartItemIds}).then(cartItems => {
-        console.log('cartItems', cartItems)
-      })
+    if (false) {
+      // CartItem.find().where('_id').in(req.cart.item).then(cartItems => {
+      //   console.log('cartItems', cartItems)
+      // })
       // for (existingCartItemId of existingCartItemsIds) {
 
       //   CartItem.findById(existingCartItemId).populate('product').then(existingCartItem => {
