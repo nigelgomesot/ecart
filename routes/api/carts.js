@@ -44,43 +44,33 @@ router.put('/:cartId/addProduct', auth.required, (req, res, next) => {
     if (req.cart.customer._id.toString() != user._id.toString())
       return res.sendStatus(403)
 
-    const reqProduct = req.body.product
+    CartItem.find({'_id': {$in: req.cart.items}}).populate('product').then(cartItems => {
+      const reqProduct = req.body.product
+      const cartProductSlugs = cartItems.map(cartItem => cartItem.product.slug)
 
-    console.log('req.payload.id', req.payload.id)
-    CartItem.findById('60638b5ea2af92a28ca7579d').then(ci => {console.log('ci', ci)})
+      if (cartProductSlugs.includes(reqProduct.slug))
+        return res.sendStatus(409)
 
-    if (false) {
-      // CartItem.find().where('_id').in(req.cart.item).then(cartItems => {
-      //   console.log('cartItems', cartItems)
-      // })
-      // for (existingCartItemId of existingCartItemsIds) {
+      Product.findOne({slug: reqProduct.slug}).then(product => {
+        if (!product)
+          return res.sendStatus(404)
 
-      //   CartItem.findById(existingCartItemId).populate('product').then(existingCartItem => {
-      //     console.log('>>>>>>> existingCartItem',existingCartItem)
-      //     if (existingCartItem.product.slug === reqProduct.slug)
-      //       return res.sendStatus(409)
-      //   })
-      // }
-    }
+        const cartItem = new CartItem()
+        cartItem.product = product,
+        cartItem.quantity = reqProduct.quantity
 
-    Product.findOne({slug: reqProduct.slug}).then(product => {
-      if (!product)
-        return res.sendStatus(404)
+        return cartItem.save().then(() => {
+          req.cart.items.push(cartItem)
 
-      const cartItem = new CartItem({
-        product: product,
-        quantity: reqProduct.quantity
-      })
-
-      req.cart.items.push(cartItem)
-
-      req.cart.save().then(() => {
-        return res.json({
-          status: 'success',
-          cart: req.cart.toJSON()
+          req.cart.save().then(() => {
+            return res.json({
+              status: 'success',
+              cartItem: cartItem.toJSON()
+            })
+          })
         })
-      }).catch(next)
-    }).catch(next)
+      })
+    })
   }).catch(next)
 })
 
