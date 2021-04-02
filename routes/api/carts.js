@@ -36,7 +36,7 @@ router.param('cartId', (req, res, next, cartId) => {
 })
 
 // add product
-router.put('/:cartId/addProduct', auth.required, (req, res, next) => {
+router.post('/:cartId/addProduct', auth.required, (req, res, next) => {
   User.findById(req.payload.id).then(user => {
     if(!user)
       return res.sendStatus(401)
@@ -44,7 +44,7 @@ router.put('/:cartId/addProduct', auth.required, (req, res, next) => {
     if (req.cart.customer._id.toString() != user._id.toString())
       return res.sendStatus(403)
 
-    CartItem.find({'_id': {$in: req.cart.items}}).populate('product').then(cartItems => {
+    CartItem.find({_id: {$in: req.cart.items}}).populate('product').then(cartItems => {
       const reqProduct = req.body.product
       const cartProductSlugs = cartItems.map(cartItem => cartItem.product.slug)
 
@@ -69,6 +69,38 @@ router.put('/:cartId/addProduct', auth.required, (req, res, next) => {
             })
           })
         })
+      })
+    })
+  }).catch(next)
+})
+
+// remove product
+router.delete('/:cartId/removeProduct', auth.required, (req, res, next) => {
+  User.findById(req.payload.id).then(user => {
+    if (!user)
+      return res.sendStatus(401)
+
+    if (req.cart.customer._id.toString() != user._id.toString())
+      return res.sendStatus(403)
+
+    CartItem.find({_id: {$in: req.cart.items}}).populate('product').then(cartItems => {
+      const reqProduct = req.body.product
+      let cartItemForProduct = null
+
+      for (cartItem of cartItems) {
+        if (cartItem.product.slug === reqProduct.slug)
+          cartItemForProduct = cartItem
+      }
+
+      if (!cartItemForProduct)
+        return res.sendStatus(404)
+
+      req.cart.items.remove(cartItemForProduct._id)
+
+      req.cart.save().then(() => {
+        CartItem.find({_id: cartItemForProduct._id}).remove().exec()
+      }).then(() => {
+        return res.sendStatus(204)
       })
     })
   }).catch(next)
