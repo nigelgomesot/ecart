@@ -6,6 +6,7 @@ const User = mongoose.model('User')
 const Cart = mongoose.model('Cart')
 const CartItem = mongoose.model('CartItem')
 const Product = mongoose.model('Product')
+const Address = mongoose.model('Address')
 
 const auth = require('../auth')
 
@@ -105,5 +106,32 @@ router.delete('/:cartId/removeProduct', auth.required, (req, res, next) => {
     })
   }).catch(next)
 })
+
+// add address
+router.post('/:cartId/AddShippingAddress', auth.required, (req, res, next) => {
+  User.findById(req.payload.id).then(user => {
+    if (!user)
+      return res.sendStatus(401)
+
+    if (req.cart.customer._id.toString() != user._id.toString())
+      return res.sendStatus(403)
+
+    const shippingAddress = new Address(req.body.shippingAddress)
+
+    return shippingAddress.save().then(() => {
+      req.cart.shippingAddress = shippingAddress
+
+      req.cart.save().then(() => {
+        return res.json({
+          status: 'success',
+          shippingAddress: shippingAddress.toJSON()
+        })
+      })
+    })
+  }).catch(next)
+})
+
+
+// PENDING: edit address
 
 module.exports = router

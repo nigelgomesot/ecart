@@ -15,6 +15,7 @@ require('./models/user')
 require('./models/product')
 require('./models/cart_item')
 require('./models/cart')
+require('./models/address')
 require('./config/passport')
 app.use(require('./routes'))
 
