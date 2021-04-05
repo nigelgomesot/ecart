@@ -6,7 +6,8 @@ const CartSchema = new mongoose.Schema({
   items: [{type: mongoose.Schema.Types.ObjectId, ref: 'CartItem'}],
   customer: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
   status: String,
-  shippingAddress: {type: mongoose.Schema.Types.ObjectId, ref: 'Address'}
+  shippingAddress: {type: mongoose.Schema.Types.ObjectId, ref: 'Address'},
+  paymentInfo: {type: mongoose.Schema.Types.ObjectId, ref: 'Payment'}
 }, {timestamps: true})
 
 CartSchema.pre('validate', function(next) {
@@ -23,7 +24,8 @@ CartSchema.methods.toJSON = function() {
     items: this.items,
     customer: this.customer.toProfileJSON(),
     status: this.status,
-    shippingAddress: (this.shippingAddress ? this.shippingAddress.toJSON() : null)
+    shippingAddress: (this.shippingAddress ? this.shippingAddress.toJSON() : null),
+    paymentInfo: (this.paymentInfo ? this.paymentInfo.toJSON() : null)
   }
 }
 

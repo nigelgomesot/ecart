@@ -7,6 +7,7 @@ const Cart = mongoose.model('Cart')
 const CartItem = mongoose.model('CartItem')
 const Product = mongoose.model('Product')
 const Address = mongoose.model('Address')
+const Payment = mongoose.model('Payment')
 
 const auth = require('../auth')
 
@@ -131,7 +132,31 @@ router.post('/:cartId/AddShippingAddress', auth.required, (req, res, next) => {
   }).catch(next)
 })
 
+// TODO: edit address
 
-// PENDING: edit address
+// add payment
+// Pending: Payment Type details
+router.post('/:cartId/addPaymentInfo', auth.required, (req, res, next) => {
+  User.findById(req.payload.id).then(user => {
+    if (!user)
+      return res.sendStatus(401)
+
+    if (req.cart.customer._id.toString() != user._id.toString())
+      return res.sendStatus(403)
+
+    const paymentInfo = new Payment(req.body.paymentInfo)
+
+    return paymentInfo.save().then(() => {
+      req.cart.paymentInfo = paymentInfo
+
+      req.cart.save().then(() => {
+        return res.json({
+          status: 'success',
+          paymentInfo: paymentInfo.toJSON()
+        })
+      })
+    })
+  }).catch(next)
+})
 
 module.exports = router
