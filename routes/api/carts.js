@@ -159,4 +159,6 @@ router.post('/:cartId/addPaymentInfo', auth.required, (req, res, next) => {
   }).catch(next)
 })
 
+// TODO: confirm Payment (add payment detals to PaymentInfo)
+
 module.exports = router
