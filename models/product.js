@@ -7,7 +7,8 @@ const ProductSchema = new mongoose.Schema({
   sku: {type: String, unique: true, required: [true, 'cannot be blank'], match: [/^[A-Z0-9]+$/, 'must be alphanumeric'], index: true},
   title: String,
   description: String,
-  categoryList: [{type: String}]
+  categoryList: [{type: String}],
+  price: {type: Number, required: true}
 }, {timestamps: true})
 
 ProductSchema.plugin(uniqueValidator, {message: 'is already taken'})
@@ -30,6 +31,7 @@ ProductSchema.methods.toJSONFor = function(user) {
     title: this.title,
     description: this.description,
     categoryList: this.categoryList,
+    price: this.price,
     createdAt: this.createdAt,
     updatedAt: this.updatedAt
   }

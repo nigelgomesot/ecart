@@ -145,6 +145,7 @@ router.post('/:cartId/addPaymentInfo', auth.required, (req, res, next) => {
       return res.sendStatus(403)
 
     const paymentInfo = new Payment(req.body.paymentInfo)
+    paymentInfo.computeAmounts(req.cart.items)
 
     return paymentInfo.save().then(() => {
       req.cart.paymentInfo = paymentInfo

@@ -4,9 +4,9 @@ const PaymentSchema = new mongoose.Schema({
   payType: {type: String, required: true},
   status: {type: String, required: true},
   baseAmount: {type: Number, required: true},
-  totalFee: {type: Number},
-  totalTax: {type: Number},
-  totalAmount: {type: Number},
+  totalFee: {type: Number, required: true},
+  totalTax: {type: Number, required: true},
+  totalAmount: {type: Number, required: true},
 
 }, {timestamps: true})
 
@@ -17,17 +17,18 @@ PaymentSchema.pre('validate', function(next) {
   next()
 })
 
-// TODO: fetch baseAmount from sum of cart items
-PaymentSchema.pre('save', function(next) {
-  if (this.status === 'pending') {
-    this.totalFee = this.baseAmount * 0.2
-    this.totalTax = this.baseAmount * 0.1
+PaymentSchema.methods.buildAmounts = function(cartItems) {
+  this.baseAmount = 0
 
-    this.totalAmount = this.baseAmount + this.totalFee + this.totalTax
+  for (let cartItem of cartItem) {
+    baseAmount += cartItem.totalPrice
   }
 
-  next()
-})
+  this.totalFee = this.baseAmount * 0.2
+  this.totalTax = this.baseAmount * 0.1
+
+  this.totalAmount = this.baseAmount + this.totalFee + this.totalTax
+}
 
 PaymentSchema.methods.toJSON = function() {
   return {
