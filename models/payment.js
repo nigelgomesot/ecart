@@ -17,11 +17,11 @@ PaymentSchema.pre('validate', function(next) {
   next()
 })
 
-PaymentSchema.methods.buildAmounts = function(cartItems) {
+PaymentSchema.methods.computeAmounts = function(cartItems) {
   this.baseAmount = 0
 
-  for (let cartItem of cartItem) {
-    baseAmount += cartItem.totalPrice
+  for (let cartItem of cartItems) {
+    this.baseAmount += cartItem.totalPrice
   }
 
   this.totalFee = this.baseAmount * 0.2
