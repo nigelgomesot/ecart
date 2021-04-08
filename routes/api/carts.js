@@ -60,6 +60,8 @@ router.post('/:cartId/addProduct', auth.required, (req, res, next) => {
         const cartItem = new CartItem()
         cartItem.product = product,
         cartItem.quantity = reqProduct.quantity
+        cartItem.price = product.price
+        cartItem.totalPrice = product.price * cartItem.quantity
 
         return cartItem.save().then(() => {
           req.cart.items.push(cartItem)
@@ -145,15 +147,15 @@ router.post('/:cartId/addPaymentInfo', auth.required, (req, res, next) => {
       return res.sendStatus(403)
 
     const paymentInfo = new Payment(req.body.paymentInfo)
-    paymentInfo.computeAmounts(req.cart.items)
+    paymentInfo.computeAmounts(req.cart.items).then(() => {
+      return paymentInfo.save().then(() => {
+        req.cart.paymentInfo = paymentInfo
 
-    return paymentInfo.save().then(() => {
-      req.cart.paymentInfo = paymentInfo
-
-      req.cart.save().then(() => {
-        return res.json({
-          status: 'success',
-          paymentInfo: paymentInfo.toJSON()
+        req.cart.save().then(() => {
+          return res.json({
+            status: 'success',
+            paymentInfo: paymentInfo.toJSON()
+          })
         })
       })
     })

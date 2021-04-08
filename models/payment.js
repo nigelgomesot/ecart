@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const CartItem = mongoose.model('CartItem')
 
 const PaymentSchema = new mongoose.Schema({
   payType: {type: String, required: true},
@@ -17,17 +18,19 @@ PaymentSchema.pre('validate', function(next) {
   next()
 })
 
-PaymentSchema.methods.computeAmounts = function(cartItems) {
+PaymentSchema.methods.computeAmounts = function(cartItemIds) {
   this.baseAmount = 0
 
-  for (let cartItem of cartItems) {
-    this.baseAmount += cartItem.totalPrice
-  }
+  return CartItem.find({_id: {$in: cartItemIds}}).then(cartItems => {
+    for (cartItem of cartItems) {
+      this.baseAmount += cartItem.totalPrice
+    }
 
-  this.totalFee = this.baseAmount * 0.2
-  this.totalTax = this.baseAmount * 0.1
+    this.totalFee = this.baseAmount * 0.2
+    this.totalTax = this.baseAmount * 0.1
 
-  this.totalAmount = this.baseAmount + this.totalFee + this.totalTax
+    this.totalAmount = this.baseAmount + this.totalFee + this.totalTax
+  })
 }
 
 PaymentSchema.methods.toJSON = function() {
