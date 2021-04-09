@@ -8,6 +8,7 @@ const CartItem = mongoose.model('CartItem')
 const Product = mongoose.model('Product')
 const Address = mongoose.model('Address')
 const Payment = mongoose.model('Payment')
+const PaymentNetbank = mongoose.model('PaymentNetbank')
 
 const auth = require('../auth')
 
@@ -163,5 +164,29 @@ router.post('/:cartId/addPaymentInfo', auth.required, (req, res, next) => {
 })
 
 // TODO: confirm Payment (add payment detals to PaymentInfo)
+router.post('/:cartId/confirmPaymentInfo', auth.required, (req, res, next) => {
+  User.findById(req.payload.id).then(user => {
+    if (!user)
+      return res.sendStatus(401)
+
+    if (req.cart.customer._id.toString() != user._id.toString())
+      return res.sendStatus(403)
+
+    const paymentInfo = Payment.findById(req.cart.paymentInfo).then(paymentInfo => {
+      switch(paymentInfo.payType) {
+        case 'NB':
+          const paymentNetBank = new PaymentNetbank(req.body.paymentResponse)
+          paymentNetBank.paymentInfo = paymentInfo
+
+          return paymentNetBank.save().then(() => {
+            return res.json({
+              'status': 'success',
+              'paymentDetails': paymentNetBank.toJSON()
+            })
+          })
+      }
+    })
+  }).catch(next)
+})
 
 module.exports = router

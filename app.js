@@ -17,6 +17,7 @@ require('./models/cart_item')
 require('./models/cart')
 require('./models/address')
 require('./models/payment')
+require('./models/payment_netbank')
 require('./config/passport')
 app.use(require('./routes'))
 
