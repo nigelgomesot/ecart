@@ -9,6 +9,7 @@ const Product = mongoose.model('Product')
 const Address = mongoose.model('Address')
 const Payment = mongoose.model('Payment')
 const PaymentNetbank = mongoose.model('PaymentNetbank')
+const PaymentCard = mongoose.model('PaymentCard')
 
 const auth = require('../auth')
 
@@ -184,6 +185,19 @@ router.post('/:cartId/confirmPaymentInfo', auth.required, (req, res, next) => {
               'paymentDetails': paymentNetBank.toJSON()
             })
           })
+          break
+
+        case 'CC':
+          const paymentCard = new PaymentCard(req.body.paymentResponse)
+          paymentCard.paymentInfo = paymentInfo
+
+          return paymentCard.save().then(() => {
+            return res.json({
+              'status': 'success',
+              'paymentDetails': paymentCard.toJSON()
+            })
+          })
+          break
       }
     })
   }).catch(next)
