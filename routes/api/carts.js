@@ -174,31 +174,39 @@ router.post('/:cartId/confirmPaymentInfo', auth.required, (req, res, next) => {
       return res.sendStatus(403)
 
     const paymentInfo = Payment.findById(req.cart.paymentInfo).then(paymentInfo => {
-      switch(paymentInfo.payType) {
-        case 'NB':
-          const paymentNetBank = new PaymentNetbank(req.body.paymentResponse)
-          paymentNetBank.paymentInfo = paymentInfo
 
-          return paymentNetBank.save().then(() => {
-            return res.json({
-              'status': 'success',
-              'paymentDetails': paymentNetBank.toJSON()
+      paymentInfo.status = req.body.paymentResponse.status
+
+      return paymentInfo.save().then(() => {
+        switch(paymentInfo.payType) {
+          case 'NB':
+            const paymentNetBank = new PaymentNetbank(req.body.paymentResponse)
+            paymentNetBank.paymentInfo = paymentInfo
+
+            return paymentNetBank.save().then(() => {
+              return res.json({
+                'status': paymentInfo.status,
+                'paymentInfo': paymentInfo.toJSON(),
+                'paymentDetails': paymentNetBank.toJSON()
+              })
             })
-          })
-          break
+            break
 
-        case 'CC':
-          const paymentCard = new PaymentCard(req.body.paymentResponse)
-          paymentCard.paymentInfo = paymentInfo
+          case 'CC':
+          case 'DC':
+            const paymentCard = new PaymentCard(req.body.paymentResponse)
+            paymentCard.paymentInfo = paymentInfo
 
-          return paymentCard.save().then(() => {
-            return res.json({
-              'status': 'success',
-              'paymentDetails': paymentCard.toJSON()
+            return paymentCard.save().then(() => {
+              return res.json({
+                'status': paymentInfo.status,
+                'paymentInfo': paymentInfo.toJSON(),
+                'paymentDetails': paymentCard.toJSON()
+              })
             })
-          })
-          break
-      }
+            break
+        }
+      })
     })
   }).catch(next)
 })
