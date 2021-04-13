@@ -17,6 +17,16 @@ CartSchema.pre('validate', function(next) {
   next()
 })
 
+CartSchema.methods.setPaymentStatus = function(paymentStatus) {
+  switch(paymentStatus) {
+    case 'success':
+      this.status = 'payment_success'
+      break
+    default:
+      this.status = 'payment_failed'
+  }
+}
+
 // TODO: use toProfileJSON for customer
 CartSchema.methods.toJSON = function() {
   return {

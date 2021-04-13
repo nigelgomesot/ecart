@@ -183,32 +183,30 @@ router.post('/:cartId/confirmPaymentInfo', auth.required, (req, res, next) => {
             const paymentNetBank = new PaymentNetbank(req.body.paymentResponse)
             paymentNetBank.paymentInfo = paymentInfo
 
-            return paymentNetBank.save().then(() => {
-              return res.json({
-                'status': paymentInfo.status,
-                'paymentInfo': paymentInfo.toJSON(),
-                'paymentDetails': paymentNetBank.toJSON()
-              })
-            })
-            break
+            return paymentNetBank.save().then(() => paymentNetBank)
 
           case 'CC':
           case 'DC':
             const paymentCard = new PaymentCard(req.body.paymentResponse)
             paymentCard.paymentInfo = paymentInfo
 
-            return paymentCard.save().then(() => {
-              return res.json({
-                'status': paymentInfo.status,
-                'paymentInfo': paymentInfo.toJSON(),
-                'paymentDetails': paymentCard.toJSON()
-              })
-            })
-            break
+            return paymentCard.save().then(() => paymentCard)
         }
+      }).then((paymentDetails) => {
+
+        req.cart.setPaymentStatus(req.body.paymentResponse.status)
+
+        return req.cart.save().then(() => {
+          return res.json({
+            'orderStatus': req.cart.status,
+            'paymentInfo': paymentInfo.toJSON(),
+            'paymentDetails': paymentDetails.toJSON()
+          })
+        })
       })
     })
   }).catch(next)
 })
+
 
 module.exports = router
