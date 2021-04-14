@@ -1,5 +1,7 @@
 const mongoose = require('mongoose')
 const CartItem = mongoose.model('CartItem')
+const PaymentNetbank = mongoose.model('PaymentNetbank')
+const PaymentCard = mongoose.model('PaymentCard')
 
 const PaymentSchema = new mongoose.Schema({
   payType: {type: String, required: true},
@@ -30,6 +32,38 @@ PaymentSchema.methods.computeAmounts = function(cartItemIds) {
     this.totalTax = this.baseAmount * 0.1
 
     this.totalAmount = this.baseAmount + this.totalFee + this.totalTax
+  })
+}
+
+PaymentSchema.methods.confirmPayment = function(cart, paymentResponse) {
+  this.status = paymentResponse.status
+
+  return this.save().then(() => {
+    switch(this.payType) {
+      case 'NB':
+        const paymentNetBank = new PaymentNetbank(paymentResponse)
+        paymentNetBank.paymentInfo = this
+
+        return paymentNetBank.save().then(() => paymentNetBank)
+
+      case 'CC':
+      case 'DC':
+        const paymentCard = new PaymentCard(paymentResponse)
+        paymentCard.paymentInfo = this
+
+        return paymentCard.save().then(() => paymentCard)
+    }
+  }).then((paymentDetails) => {
+
+    cart.setPaymentStatus(paymentResponse.status)
+
+    return cart.save().then(() => {
+      return {
+        'orderStatus': cart.status,
+        'paymentInfo': this.toJSON(),
+        'paymentDetails': paymentDetails.toJSON()
+      }
+    })
   })
 }
 
