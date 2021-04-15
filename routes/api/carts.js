@@ -164,7 +164,7 @@ router.post('/:cartId/addPaymentInfo', auth.required, (req, res, next) => {
   }).catch(next)
 })
 
-// TODO: confirm Payment (add payment detals to PaymentInfo)
+// confirm payment
 router.post('/:cartId/confirmPaymentInfo', auth.required, (req, res, next) => {
   User.findById(req.payload.id).then(user => {
     if (!user)
@@ -173,11 +173,28 @@ router.post('/:cartId/confirmPaymentInfo', auth.required, (req, res, next) => {
     if (req.cart.customer._id.toString() != user._id.toString())
       return res.sendStatus(403)
 
-    const paymentInfo = Payment.findById(req.cart.paymentInfo).then(paymentInfo => {
+    Payment.findById(req.cart.paymentInfo).then(paymentInfo => {
 
       return paymentInfo.confirmPayment(req.cart, req.body.paymentResponse)
               .then(confirmPaymentResponse => {
         return res.json(confirmPaymentResponse)
+      })
+    })
+  }).catch(next)
+})
+
+// confirm purchase
+router.post('/:cartId/confirmPurchase', auth.required, (req, res, next) => {
+  User.findById(req.payload.id).then(user => {
+    if (!user)
+      return res.sendStatus(401)
+
+    if (req.cart.customer._id.toString() != user._id.toString())
+      return res.sendStatus(403)
+
+    Payment.findById(req.cart.paymentInfo).then(paymentInfo => {
+      return req.cart.confirmPurchase(paymentInfo).then(confirmPurchaseResponse => {
+        return res.json(confirmPurchaseResponse)
       })
     })
   }).catch(next)

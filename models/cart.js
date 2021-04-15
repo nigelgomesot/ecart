@@ -27,6 +27,34 @@ CartSchema.methods.setPaymentStatus = function(paymentStatus) {
   }
 }
 
+CartSchema.methods.confirmPurchase = function(paymentInfo) {
+  if (paymentInfo.status === 'success') {
+    // INFO: random purchase status
+    const purchaseStatus = (Math.random() < 0.5)
+
+    switch(purchaseStatus) {
+      case true:
+        this.status = 'purchase_confirmed'
+        break
+      default:
+        this.status = 'purchase_failed'
+        break
+    }
+
+    return this.save().then(() => {
+      return {
+        'orderStatus': this.status,
+        'paymentInfo': paymentInfo.toJSON()
+      }
+    })
+  } else {
+    return Promise.resolve({
+      'orderStatus': this.status,
+      'paymentInfo': paymentInfo.toJSON()
+    })
+  }
+}
+
 // TODO: use toProfileJSON for customer
 CartSchema.methods.toJSON = function() {
   return {
