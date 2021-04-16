@@ -14,6 +14,15 @@ CartItemSchema.pre('validate', function(next) {
   next()
 })
 
+CartItemSchema.methods.addProduct = function(product, quantity) {
+  this.product = product,
+  this.quantity = quantity
+  this.price = product.price
+  this.totalPrice = product.price * this.quantity
+
+  return this.save()
+}
+
 // TODO: Use toJSONFor for product
 CartItemSchema.methods.toJSON = function() {
   return {

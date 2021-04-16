@@ -48,35 +48,16 @@ router.post('/:cartId/addProduct', auth.required, (req, res, next) => {
     if (req.cart.customer._id.toString() != user._id.toString())
       return res.sendStatus(403)
 
-    CartItem.find({_id: {$in: req.cart.items}}).populate('product').then(cartItems => {
-      const reqProduct = req.body.product
-      const cartProductSlugs = cartItems.map(cartItem => cartItem.product.slug)
-
-      if (cartProductSlugs.includes(reqProduct.slug))
-        return res.sendStatus(409)
-
-      Product.findOne({slug: reqProduct.slug}).then(product => {
-        if (!product)
-          return res.sendStatus(404)
-
-        const cartItem = new CartItem()
-        cartItem.product = product,
-        cartItem.quantity = reqProduct.quantity
-        cartItem.price = product.price
-        cartItem.totalPrice = product.price * cartItem.quantity
-
-        return cartItem.save().then(() => {
-          req.cart.items.push(cartItem)
-
-          req.cart.save().then(() => {
-            return res.json({
-              status: 'success',
-              cartItem: cartItem.toJSON()
-            })
-          })
-        })
+      req.cart.addCartItem(req.body.product).then(addCartItemResponse => {
+        switch(addCartItemResponse.status) {
+          case 'duplicate':
+            return res.sendStatus(409)
+          case 'product_not_found':
+            return res.sendStatus(404)
+          case 'success':
+            return res.json(addCartItemResponse)
+        }
       })
-    })
   }).catch(next)
 })
 

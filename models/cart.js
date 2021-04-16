@@ -1,4 +1,6 @@
 const mongoose = require('mongoose')
+const Product = mongoose.model('Product')
+const CartItem = mongoose.model('CartItem')
 
 // TODO: status as a list fo defined values
 
@@ -16,6 +18,34 @@ CartSchema.pre('validate', function(next) {
 
   next()
 })
+
+
+CartSchema.methods.addCartItem = function(incomingProduct) {
+  return CartItem.find({_id: {$in: this.items}}).populate('product').then(cartItems => {
+    const cartProductSlugs = cartItems.map(cartItem => cartItem.product.slug)
+
+    if (cartProductSlugs.includes(incomingProduct.slug))
+      return {'status': 'duplicate'}
+
+    return Product.findOne({slug: incomingProduct.slug}).then(product => {
+      if (!product)
+        return {'status': 'product_not_found'}
+
+      const cartItem = new CartItem()
+
+      return cartItem.addProduct(product, incomingProduct.quantity).then(() => {
+          this.items.push(cartItem)
+
+          return this.save().then(() => {
+            return {
+              status: 'success',
+              cartItem: cartItem.toJSON()
+            }
+          })
+      })
+    })
+  })
+}
 
 CartSchema.methods.setPaymentStatus = function(paymentStatus) {
   switch(paymentStatus) {
