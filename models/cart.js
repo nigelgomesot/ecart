@@ -47,6 +47,28 @@ CartSchema.methods.addCartItem = function(incomingProduct) {
   })
 }
 
+CartSchema.methods.removeCartItem = function(outgoingProduct) {
+  return CartItem.find({_id: {$in: this.items}}).populate('product').then(cartItems => {
+    let cartItemForProduct = null
+
+    for (cartItem of cartItems) {
+      if (cartItem.product.slug === outgoingProduct.slug)
+        cartItemForProduct = cartItem
+    }
+
+    if (!cartItemForProduct)
+      return {'status': 'item_not_found'}
+
+    this.items.remove(cartItemForProduct._id)
+
+    return this.save().then(() => {
+      CartItem.find({_id: cartItemForProduct._id}).remove().exec()
+    }).then(() => {
+      return {'status': 'success'}
+    })
+  })
+}
+
 CartSchema.methods.setPaymentStatus = function(paymentStatus) {
   switch(paymentStatus) {
     case 'success':

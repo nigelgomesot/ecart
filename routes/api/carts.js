@@ -70,25 +70,13 @@ router.delete('/:cartId/removeProduct', auth.required, (req, res, next) => {
     if (req.cart.customer._id.toString() != user._id.toString())
       return res.sendStatus(403)
 
-    CartItem.find({_id: {$in: req.cart.items}}).populate('product').then(cartItems => {
-      const reqProduct = req.body.product
-      let cartItemForProduct = null
-
-      for (cartItem of cartItems) {
-        if (cartItem.product.slug === reqProduct.slug)
-          cartItemForProduct = cartItem
+    req.cart.removeCartItem(req.body.product).then(removeCartItemResponse => {
+      switch(removeCartItemResponse.status) {
+        case 'item_not_found':
+          return res.sendStatus(404)
+        case 'success':
+          return res.sendStatus(204)
       }
-
-      if (!cartItemForProduct)
-        return res.sendStatus(404)
-
-      req.cart.items.remove(cartItemForProduct._id)
-
-      req.cart.save().then(() => {
-        CartItem.find({_id: cartItemForProduct._id}).remove().exec()
-      }).then(() => {
-        return res.sendStatus(204)
-      })
     })
   }).catch(next)
 })
