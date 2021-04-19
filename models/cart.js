@@ -2,8 +2,8 @@ const mongoose = require('mongoose')
 const Product = mongoose.model('Product')
 const CartItem = mongoose.model('CartItem')
 
-// TODO: status as a list fo defined values
 
+//TODO: add enum validation for status
 const CartSchema = new mongoose.Schema({
   items: [{type: mongoose.Schema.Types.ObjectId, ref: 'CartItem'}],
   customer: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},

@@ -8,7 +8,8 @@ const ProductSchema = new mongoose.Schema({
   title: String,
   description: String,
   categoryList: [{type: String}],
-  price: {type: Number, required: true}
+  price: {type: Number, required: true},
+  status: {type: String, enum: ['activated', 'deactivated']}
 }, {timestamps: true})
 
 ProductSchema.plugin(uniqueValidator, {message: 'is already taken'})
@@ -21,6 +22,9 @@ ProductSchema.pre('validate', function(next) {
   if (!this.slug)
     this.slugify()
 
+  if (!this.status)
+    this.status = 'activated'
+
   next()
 })
 
@@ -32,6 +36,7 @@ ProductSchema.methods.toJSONFor = function(user) {
     description: this.description,
     categoryList: this.categoryList,
     price: this.price,
+    status: this.status,
     createdAt: this.createdAt,
     updatedAt: this.updatedAt
   }

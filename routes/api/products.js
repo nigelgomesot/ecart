@@ -62,6 +62,12 @@ router.put('/:product', auth.required, (req, res, next) => {
     if (typeof req.body.product.description != 'undefined')
       req.product.description = req.body.product.description
 
+    if (typeof req.body.product.price != 'undefined')
+      req.product.price = req.body.product.price
+
+    if (typeof req.body.product.status != 'undefined')
+      req.product.status = req.body.product.status
+
     req.product.save().then(() => {
       return res.json({product: req.product.toJSONFor(user)})
     }).catch(next)
