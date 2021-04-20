@@ -5,7 +5,7 @@ const PaymentCard = mongoose.model('PaymentCard')
 
 const PaymentSchema = new mongoose.Schema({
   payType: {type: String, required: true},
-  status: {type: String, required: true},
+  status: {type: String, required: true, enum: ['pending', 'success', 'failed']},
   baseAmount: {type: Number, required: true},
   totalFee: {type: Number, required: true},
   totalTax: {type: Number, required: true},

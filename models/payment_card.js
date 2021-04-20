@@ -8,7 +8,7 @@ const PaymentCardSchema = new mongoose.Schema({
   expiry: {type: String, required: true},
   name: {type: String, required: true},
   txnRef: {type: Number, required: true},
-  status: {type: String, required: true}
+  status: {type: String, required: true, enum: ['success', 'failed']},
 }, {timestamps: true})
 
 // TODO: validation for cardTypes

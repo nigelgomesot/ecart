@@ -122,7 +122,7 @@ router.post('/:cartId/addPaymentInfo', auth.required, (req, res, next) => {
       return paymentInfo.save().then(() => {
         req.cart.paymentInfo = paymentInfo
 
-        req.cart.save().then(() => {
+        return req.cart.save().then(() => {
           return res.json({
             status: 'success',
             paymentInfo: paymentInfo.toJSON()
@@ -142,7 +142,7 @@ router.post('/:cartId/confirmPaymentInfo', auth.required, (req, res, next) => {
     if (req.cart.customer._id.toString() != user._id.toString())
       return res.sendStatus(403)
 
-    Payment.findById(req.cart.paymentInfo).then(paymentInfo => {
+    return Payment.findById(req.cart.paymentInfo).then(paymentInfo => {
 
       return paymentInfo.confirmPayment(req.cart, req.body.paymentResponse)
               .then(confirmPaymentResponse => {
