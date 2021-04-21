@@ -31,6 +31,9 @@ CartSchema.methods.addCartItem = function(incomingProduct) {
       if (!product)
         return {'status': 'product_not_found'}
 
+      if (product.status != 'activated')
+        return {'status': 'product_not_activated'}
+
       const cartItem = new CartItem()
 
       return cartItem.addProduct(product, incomingProduct.quantity).then(() => {

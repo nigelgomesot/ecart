@@ -54,6 +54,8 @@ router.post('/:cartId/addProduct', auth.required, (req, res, next) => {
             return res.sendStatus(409)
           case 'product_not_found':
             return res.sendStatus(404)
+          case 'product_not_activated':
+              return res.sendStatus(403)
           case 'success':
             return res.json(addCartItemResponse)
         }
