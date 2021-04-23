@@ -7,7 +7,7 @@ const ProductSchema = new mongoose.Schema({
   sku: {type: String, unique: true, required: [true, 'cannot be blank'], match: [/^[A-Z0-9]+$/, 'must be alphanumeric'], index: true},
   title: String,
   description: String,
-  categoryList: [{type: String}],
+  categoryList: [{type: String, enum: ['rings', 'chains']}],
   price: {type: Number, required: true},
   status: {type: String, enum: ['activated', 'deactivated']}
 }, {timestamps: true})
