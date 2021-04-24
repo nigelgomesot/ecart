@@ -7,7 +7,7 @@ const CartItem = mongoose.model('CartItem')
 const CartSchema = new mongoose.Schema({
   items: [{type: mongoose.Schema.Types.ObjectId, ref: 'CartItem'}],
   customer: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
-  status: String,
+  status: {type: String, required: true, enum: ['pending', 'payment_success', 'payment_failed', 'purchase_confirmed', 'purchase_failed']},
   shippingAddress: {type: mongoose.Schema.Types.ObjectId, ref: 'Address'},
   paymentInfo: {type: mongoose.Schema.Types.ObjectId, ref: 'Payment'}
 }, {timestamps: true})

@@ -78,6 +78,4 @@ PaymentSchema.methods.toJSON = function() {
   }
 }
 
-// Pending: validations for payType and status
-
 mongoose.model('Payment', PaymentSchema)
