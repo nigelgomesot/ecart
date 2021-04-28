@@ -3,11 +3,16 @@ const CartItem = mongoose.model('CartItem')
 const PaymentNetbank = mongoose.model('PaymentNetbank')
 const PaymentCard = mongoose.model('PaymentCard')
 
+const countryShippingFeeMap = new Map()
+countryShippingFeeMap.set('US', 0)
+countryShippingFeeMap.set('DEFAULT', 0.3)
+
 const PaymentSchema = new mongoose.Schema({
   payType: {type: String, required: true, enum: ['CC', 'DC', 'NB']},
   status: {type: String, required: true, enum: ['pending', 'success', 'failed']},
   baseAmount: {type: Number, required: true},
   totalFee: {type: Number, required: true},
+  shippingFee: {type: Number, required: true},
   totalTax: {type: Number, required: true},
   totalAmount: {type: Number, required: true},
 
@@ -20,7 +25,7 @@ PaymentSchema.pre('validate', function(next) {
   next()
 })
 
-PaymentSchema.methods.computeAmounts = function(cartItemIds) {
+PaymentSchema.methods.computeAmounts = function(cartItemIds, shippingCountryCode) {
   this.baseAmount = 0
 
   return CartItem.find({_id: {$in: cartItemIds}}).then(cartItems => {
@@ -28,9 +33,15 @@ PaymentSchema.methods.computeAmounts = function(cartItemIds) {
       this.baseAmount += cartItem.totalPrice
     }
 
+    // TODO: integrate shippingCountryCode in API
+    if (countryShippingFeeMap.has(shippingCountryCode))
+      this.totalFee = this.baseAmount * countryShippingFeeMap.get(shippingCountryCode)
+    else
+      this.totalFee = this.baseAmount * countryShippingFeeMap.get('DEFAULT')
+
     this.totalFee = this.baseAmount * 0.2
     this.totalTax = this.baseAmount * 0.1
-
+s
     this.totalAmount = this.baseAmount + this.totalFee + this.totalTax
   })
 }

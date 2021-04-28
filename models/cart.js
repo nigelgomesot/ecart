@@ -2,8 +2,6 @@ const mongoose = require('mongoose')
 const Product = mongoose.model('Product')
 const CartItem = mongoose.model('CartItem')
 
-
-//TODO: add enum validation for status
 const CartSchema = new mongoose.Schema({
   items: [{type: mongoose.Schema.Types.ObjectId, ref: 'CartItem'}],
   customer: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
@@ -18,7 +16,6 @@ CartSchema.pre('validate', function(next) {
 
   next()
 })
-
 
 CartSchema.methods.addCartItem = function(incomingProduct) {
   return CartItem.find({_id: {$in: this.items}}).populate('product').then(cartItems => {

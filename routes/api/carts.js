@@ -108,6 +108,22 @@ router.post('/:cartId/AddShippingAddress', auth.required, (req, res, next) => {
 })
 
 // TODO: edit address
+router.put('/:cartId/EditShippingAddress', auth.required, (req, res, next) => {
+  User.findById(req.payload.id).then(user => {
+    if (!user)
+      return res.sendStatus(401)
+
+    if (req.cart.customer._id.toString() != user._id.toString())
+      return res.sendStatus(403)
+
+    Address.findById(req.cart.shippingAddress).then(shippingAddress => {
+      if (!shippingAddress)
+        return res.sendStatus(404)
+
+      // REF: TODO: edit address
+    })
+  })
+})
 
 // add payment
 // Pending: Payment Type details
