@@ -116,11 +116,34 @@ router.put('/:cartId/EditShippingAddress', auth.required, (req, res, next) => {
     if (req.cart.customer._id.toString() != user._id.toString())
       return res.sendStatus(403)
 
-    Address.findById(req.cart.shippingAddress).then(shippingAddress => {
+    return Address.findById(req.cart.shippingAddress).then(shippingAddress => {
       if (!shippingAddress)
         return res.sendStatus(404)
 
-      // REF: TODO: edit address
+      if (typeof req.body.shippingAddress.street != 'undefined')
+        shippingAddress.street = req.body.shippingAddress.street
+
+      if (typeof req.body.shippingAddress.unit != 'undefined')
+        shippingAddress.unit = req.body.shippingAddress.unit
+
+      if (typeof req.body.shippingAddress.city != 'undefined')
+        shippingAddress.city = req.body.shippingAddress.city
+
+      if (typeof req.body.shippingAddress.state != 'undefined')
+        shippingAddress.state = req.body.shippingAddress.state
+
+      if (typeof req.body.shippingAddress.zipcode != 'undefined')
+        shippingAddress.zipcode = req.body.shippingAddress.zipcode
+
+      if (typeof req.body.shippingAddress.country != 'undefined')
+        shippingAddress.country = req.body.shippingAddress.country
+
+      return shippingAddress.save().then(() => {
+        return res.json({
+          status: 'success',
+          shippingAddress: shippingAddress.toJSON()
+        })
+      })
     })
   })
 })
