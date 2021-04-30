@@ -25,7 +25,7 @@ PaymentSchema.pre('validate', function(next) {
   next()
 })
 
-PaymentSchema.methods.computeAmounts = function(cartItemIds, shippingCountryCode) {
+PaymentSchema.methods.computeAmounts = function(cartItemIds, shippingAddress) {
   this.baseAmount = 0
 
   return CartItem.find({_id: {$in: cartItemIds}}).then(cartItems => {
@@ -33,7 +33,7 @@ PaymentSchema.methods.computeAmounts = function(cartItemIds, shippingCountryCode
       this.baseAmount += cartItem.totalPrice
     }
 
-    // TODO: integrate shippingCountryCode in API
+    const shippingCountryCode = shippingAddress.country
     if (countryShippingFeeMap.has(shippingCountryCode))
       this.totalFee = this.baseAmount * countryShippingFeeMap.get(shippingCountryCode)
     else

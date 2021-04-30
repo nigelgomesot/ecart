@@ -158,15 +158,21 @@ router.post('/:cartId/addPaymentInfo', auth.required, (req, res, next) => {
     if (req.cart.customer._id.toString() != user._id.toString())
       return res.sendStatus(403)
 
-    const paymentInfo = new Payment(req.body.paymentInfo)
-    return paymentInfo.computeAmounts(req.cart.items).then(() => {
-      return paymentInfo.save().then(() => {
-        req.cart.paymentInfo = paymentInfo
+    return Address.findById(req.cart.shippingAddress).then((shippingAddress) => {
+      if (!shippingAddress)
+        return res.sendStatus(404)
 
-        return req.cart.save().then(() => {
-          return res.json({
-            status: 'success',
-            paymentInfo: paymentInfo.toJSON()
+      const paymentInfo = new Payment(req.body.paymentInfo)
+      // TODO: test shippingCountryCode integration
+      return paymentInfo.computeAmounts(req.cart.items, shippingAddress).then(() => {
+        return paymentInfo.save().then(() => {
+          req.cart.paymentInfo = paymentInfo
+
+          return req.cart.save().then(() => {
+            return res.json({
+              status: 'success',
+              paymentInfo: paymentInfo.toJSON()
+            })
           })
         })
       })
