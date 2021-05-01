@@ -145,11 +145,10 @@ router.put('/:cartId/EditShippingAddress', auth.required, (req, res, next) => {
         })
       })
     })
-  })
+  }).catch(next)
 })
 
 // add payment
-// Pending: Payment Type details
 router.post('/:cartId/addPaymentInfo', auth.required, (req, res, next) => {
   User.findById(req.payload.id).then(user => {
     if (!user)
@@ -163,7 +162,6 @@ router.post('/:cartId/addPaymentInfo', auth.required, (req, res, next) => {
         return res.sendStatus(404)
 
       const paymentInfo = new Payment(req.body.paymentInfo)
-      // TODO: test shippingCountryCode integration
       return paymentInfo.computeAmounts(req.cart.items, shippingAddress).then(() => {
         return paymentInfo.save().then(() => {
           req.cart.paymentInfo = paymentInfo

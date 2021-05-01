@@ -25,6 +25,7 @@ PaymentSchema.pre('validate', function(next) {
   next()
 })
 
+// TODO: add gateway fee.
 PaymentSchema.methods.computeAmounts = function(cartItemIds, shippingAddress) {
   this.baseAmount = 0
 
@@ -35,13 +36,13 @@ PaymentSchema.methods.computeAmounts = function(cartItemIds, shippingAddress) {
 
     const shippingCountryCode = shippingAddress.country
     if (countryShippingFeeMap.has(shippingCountryCode))
-      this.totalFee = this.baseAmount * countryShippingFeeMap.get(shippingCountryCode)
+      this.shippingFee = this.baseAmount * countryShippingFeeMap.get(shippingCountryCode)
     else
-      this.totalFee = this.baseAmount * countryShippingFeeMap.get('DEFAULT')
+      this.shippingFee = this.baseAmount * countryShippingFeeMap.get('DEFAULT')
 
-    this.totalFee = this.baseAmount * 0.2
+    this.totalFee = this.shippingFee
     this.totalTax = this.baseAmount * 0.1
-s
+
     this.totalAmount = this.baseAmount + this.totalFee + this.totalTax
   })
 }
@@ -83,6 +84,7 @@ PaymentSchema.methods.toJSON = function() {
     payType: this.payType,
     status: this.status,
     baseAmount: this.baseAmount,
+    shippingFee: this.shippingFee,
     totalFee: this.totalFee,
     totalTax: this.totalTax,
     totalAmount: this.totalAmount
