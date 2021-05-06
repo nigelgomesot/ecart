@@ -7,12 +7,17 @@ const countryShippingFeeMap = new Map()
 countryShippingFeeMap.set('US', 0)
 countryShippingFeeMap.set('DEFAULT', 0.3)
 
+const gatewayFeeMap = new Map()
+gatewayFeeMap.set('CC', 0.2)
+gatewayFeeMap.set('DEFAULT', 0)
+
 const PaymentSchema = new mongoose.Schema({
   payType: {type: String, required: true, enum: ['CC', 'DC', 'NB']},
   status: {type: String, required: true, enum: ['pending', 'success', 'failed']},
   baseAmount: {type: Number, required: true},
   totalFee: {type: Number, required: true},
   shippingFee: {type: Number, required: true},
+  gatewayFee: {type: Number, required: true},
   totalTax: {type: Number, required: true},
   totalAmount: {type: Number, required: true},
 
@@ -25,7 +30,7 @@ PaymentSchema.pre('validate', function(next) {
   next()
 })
 
-// TODO: add gateway fee.
+// TODO: add service tax.
 PaymentSchema.methods.computeAmounts = function(cartItemIds, shippingAddress) {
   this.baseAmount = 0
 
@@ -40,7 +45,9 @@ PaymentSchema.methods.computeAmounts = function(cartItemIds, shippingAddress) {
     else
       this.shippingFee = this.baseAmount * countryShippingFeeMap.get('DEFAULT')
 
-    this.totalFee = this.shippingFee
+    this.gatewayFee = this.baseAmount * gatewayFeeMap.get(this.payType) || gatewayFeeMap.get('DEFAULT')
+
+    this.totalFee = this.shippingFee + this.gatewayFee
     this.totalTax = this.baseAmount * 0.1
 
     this.totalAmount = this.baseAmount + this.totalFee + this.totalTax
@@ -85,6 +92,7 @@ PaymentSchema.methods.toJSON = function() {
     status: this.status,
     baseAmount: this.baseAmount,
     shippingFee: this.shippingFee,
+    gatewayFee : this.gatewayFee,
     totalFee: this.totalFee,
     totalTax: this.totalTax,
     totalAmount: this.totalAmount
