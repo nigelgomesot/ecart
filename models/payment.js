@@ -18,6 +18,7 @@ const PaymentSchema = new mongoose.Schema({
   totalFee: {type: Number, required: true},
   shippingFee: {type: Number, required: true},
   gatewayFee: {type: Number, required: true},
+  serviceTax: {type: Number, required: true},
   totalTax: {type: Number, required: true},
   totalAmount: {type: Number, required: true},
 
@@ -30,7 +31,7 @@ PaymentSchema.pre('validate', function(next) {
   next()
 })
 
-// TODO: add service tax.
+// TODO: add shipping tax.
 PaymentSchema.methods.computeAmounts = function(cartItemIds, shippingAddress) {
   this.baseAmount = 0
 
@@ -48,7 +49,9 @@ PaymentSchema.methods.computeAmounts = function(cartItemIds, shippingAddress) {
     this.gatewayFee = this.baseAmount * gatewayFeeMap.get(this.payType) || gatewayFeeMap.get('DEFAULT')
 
     this.totalFee = this.shippingFee + this.gatewayFee
-    this.totalTax = this.baseAmount * 0.1
+
+    this.serviceTax = this.baseAmount * 0.1
+    this.totalTax = this.serviceTax
 
     this.totalAmount = this.baseAmount + this.totalFee + this.totalTax
   })
@@ -94,6 +97,7 @@ PaymentSchema.methods.toJSON = function() {
     shippingFee: this.shippingFee,
     gatewayFee : this.gatewayFee,
     totalFee: this.totalFee,
+    serviceTax: this.serviceTax,
     totalTax: this.totalTax,
     totalAmount: this.totalAmount
   }
