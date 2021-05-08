@@ -3,7 +3,9 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const mongoose = require('mongoose')
 
-mongoose.connect('mongodb://localhost/ecart')
+let config = require('config');
+
+mongoose.connect(config.DBHost)
 mongoose.set('debug', true)
 
 const app = express()
@@ -25,3 +27,4 @@ app.use(require('./routes'))
 const server = app.listen(3001, () => {
   console.log('listening on post:', server.address().port)
 })
+
