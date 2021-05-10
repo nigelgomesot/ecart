@@ -28,3 +28,4 @@ const server = app.listen(3001, () => {
   console.log('listening on post:', server.address().port)
 })
 
+module.exports = app
