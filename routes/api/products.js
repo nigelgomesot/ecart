@@ -22,6 +22,7 @@ router.param('product', (req, res, next, slug) => {
 // create product
 router.post('/', auth.required, (req, res, next) => {
   User.findById(req.payload.id).then(user => {
+
     if (!user)
       return res.sendStatus(401)
 
@@ -30,7 +31,7 @@ router.post('/', auth.required, (req, res, next) => {
     // TODO: save createdBy
 
     return product.save().then(() => {
-      return res.json({product: product.toJSONFor(user)})
+      return res.status(201).json({product: product.toJSONFor(user)})
     })
   }).catch(next)
 })
