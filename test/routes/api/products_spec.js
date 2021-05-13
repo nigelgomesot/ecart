@@ -44,7 +44,8 @@ describe('Products', function() {
           "sku": "RN14",
           "title":"ring 14",
           "description":"a silver ring",
-          "categoryList":["rings"], "price": 80
+          "categoryList":["rings"],
+          "price": 80
         }
       }
 
@@ -56,7 +57,16 @@ describe('Products', function() {
           expect(err).to.be.null;
           expect(res).to.have.status(201);
 
-          done()
+          Product.findOne({sku: 'RN14'}).then(dbProduct => {
+            expect(dbProduct.slug).to.eql('rn14-ring-14')
+            expect(dbProduct.title).to.eql('ring 14')
+            expect(dbProduct.description).to.eql('a silver ring')
+            expect(dbProduct.categoryList).to.eql(["rings"])
+            expect(dbProduct.price).to.eql(80)
+            expect(dbProduct.status).to.eql('activated')
+
+            done()
+          }).catch(err => done(err))
         })
     })
   })
