@@ -69,5 +69,38 @@ describe('Products', function() {
           }).catch(err => done(err))
         })
     })
+
+    it('returns error if product already exist', function(done) {
+      existingProduct = new Product()
+      existingProduct.sku = "RN14"
+      existingProduct.title = "ring 14"
+      existingProduct.description = "a silver ring"
+      existingProduct.categoryList = ["rings"]
+      existingProduct.price = 80
+
+      existingProduct.save().then(() => {
+        let product = { "product":
+          {
+            "sku": existingProduct.sku,
+            "title": existingProduct.title,
+            "description": existingProduct.description,
+            "categoryList": existingProduct.categoryList,
+            "price": existingProduct.price
+          }
+        }
+
+        chai.request(app)
+          .post('/api/products')
+          .set('Authorization', `Token ${this.user.generateJWT()}`)
+          .send(product)
+          .end((err, res) => {
+            expect(err).to.be.null;
+            expect(res).to.have.status(422);
+            expect(res.body.errors.sku).to.eql('is already taken')
+
+            done()
+          })
+      })
+    })
   })
 })
