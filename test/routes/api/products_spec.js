@@ -103,4 +103,37 @@ describe('Products', function() {
       })
     })
   })
+
+  describe('GET /api/products', function() {
+    beforeEach(function(done) {
+      product = new Product()
+      product.sku = "RN14"
+      product.title = "ring 14"
+      product.description = "a silver ring"
+      product.categoryList = ["rings"]
+      product.price = 80
+
+      product.save().then(() => {
+        this.product = product
+
+        done()
+      }).catch((err) => {
+        console.error('error:', err)
+        done()
+      })
+    })
+
+    it('fetches a product', function(done) {
+      chai.request(app)
+        .get(`/api/products/${this.product.slug}`)
+        .set('Authorization', `Token ${this.user.generateJWT()}`)
+        .end((err, res) => {
+          expect(err).to.be.null;
+          expect(res).to.have.status(200);
+          expect(res.body.product.sku).to.eql('RN14')
+
+          done()
+        })
+    })
+  })
 })
