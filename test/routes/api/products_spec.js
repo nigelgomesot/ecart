@@ -54,7 +54,7 @@ describe('Products', function() {
         .set('Authorization', `Token ${this.user.generateJWT()}`)
         .send(product)
         .end((err, res) => {
-          expect(err).to.be.null;
+          expect(err).to.be.null
           expect(res).to.have.status(201);
 
           Product.findOne({sku: 'RN14'}).then(dbProduct => {
@@ -94,7 +94,7 @@ describe('Products', function() {
           .set('Authorization', `Token ${this.user.generateJWT()}`)
           .send(product)
           .end((err, res) => {
-            expect(err).to.be.null;
+            expect(err).to.be.null
             expect(res).to.have.status(422);
             expect(res.body.errors.sku).to.eql('is already taken')
 
@@ -128,7 +128,7 @@ describe('Products', function() {
         .get(`/api/products/${this.product.slug}`)
         .set('Authorization', `Token ${this.user.generateJWT()}`)
         .end((err, res) => {
-          expect(err).to.be.null;
+          expect(err).to.be.null
           expect(res).to.have.status(200);
           expect(res.body.product.sku).to.eql('RN14')
 
@@ -143,8 +143,49 @@ describe('Products', function() {
         .get(`/api/products/${nonExistentSlug}`)
         .set('Authorization', `Token ${this.user.generateJWT()}`)
         .end((err, res) => {
-          expect(err).to.be.null;
+          expect(err).to.be.null
           expect(res).to.have.status(404);
+
+          done()
+        })
+    })
+  })
+
+  describe('PUT /api/products', function() {
+    beforeEach(function(done) {
+      product = new Product()
+      product.sku = "RN14"
+      product.title = "ring 14"
+      product.description = "a silver ring"
+      product.categoryList = ["rings"]
+      product.price = 80
+
+      product.save().then(() => {
+        this.product = product
+
+        done()
+      }).catch((err) => {
+        console.error('error:', err)
+        done()
+      })
+    })
+
+    it('updates a product', function(done) {
+      let updatedProduct = { "product":
+        {
+          "description":"a metal ring",
+          "price": 30
+        }
+      }
+
+      chai.request(app)
+        .put(`/api/products/${this.product.slug}`)
+        .set('Authorization', `Token ${this.user.generateJWT()}`)
+        .send(updatedProduct)
+        .end((err, res) => {
+          expect(err).to.be.null
+          expect(res.body.product.description).to.eql('a metal ring')
+          expect(res.body.product.price).to.eql(30)
 
           done()
         })
