@@ -190,5 +190,26 @@ describe('Products', function() {
           done()
         })
     })
+
+    it('returns error for bad product details', function(done) {
+      let updatedProduct = { "product":
+        {
+          "status": 'invalid-status'
+        }
+      }
+
+      chai.request(app)
+        .put(`/api/products/${this.product.slug}`)
+        .set('Authorization', `Token ${this.user.generateJWT()}`)
+        .send(updatedProduct)
+        .end((err, res) => {
+          console.log('>>> res.body', res.body)
+          expect(err).to.be.null
+          expect(res).to.have.status(422);
+          expect(res.body.errors.status).to.include('is not a valid enum')
+
+          done()
+        })
+    })
   })
 })
