@@ -203,12 +203,47 @@ describe('Products', function() {
         .set('Authorization', `Token ${this.user.generateJWT()}`)
         .send(updatedProduct)
         .end((err, res) => {
-          console.log('>>> res.body', res.body)
           expect(err).to.be.null
           expect(res).to.have.status(422);
           expect(res.body.errors.status).to.include('is not a valid enum')
 
           done()
+        })
+    })
+  })
+
+  describe('DELETE /api/products', function() {
+    beforeEach(function(done) {
+      product = new Product()
+      product.sku = "RN14"
+      product.title = "ring 14"
+      product.description = "a silver ring"
+      product.categoryList = ["rings"]
+      product.price = 80
+
+      product.save().then(() => {
+        this.product = product
+
+        done()
+      }).catch((err) => {
+        console.error('error:', err)
+        done()
+      })
+    })
+
+    it('deletes a product', function(done) {
+      chai.request(app)
+        .delete(`/api/products/${this.product.slug}`)
+        .set('Authorization', `Token ${this.user.generateJWT()}`)
+        .end((err, res) => {
+          expect(err).to.be.null
+          expect(res).to.have.status(204);
+
+          Product.findOne({sku: 'RN14'}).then(dbProduct => {
+            expect(dbProduct).to.be.null
+
+            done()
+          }).catch(err => done(err))
         })
     })
   })
