@@ -246,5 +246,19 @@ describe('Products', function() {
           }).catch(err => done(err))
         })
     })
+
+    it('returns error for non-existent product', function(done) {
+      const nonExistentSlug = 'non-existent-slug'
+
+      chai.request(app)
+        .delete(`/api/products/${nonExistentSlug}`)
+        .set('Authorization', `Token ${this.user.generateJWT()}`)
+        .end((err, res) => {
+          expect(err).to.be.null
+          expect(res).to.have.status(404);
+
+          done()
+        })
+    })
   })
 })
