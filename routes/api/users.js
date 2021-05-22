@@ -12,7 +12,7 @@ router.post('/users', (req, res, next) => {
   user.setPassword(req.body.user.password)
 
   user.save().then(() => {
-    return res.json({user: user.toAuthJSON()})
+    return res.sendStatus(201).json({user: user.toAuthJSON()})
   }).catch(next)
 })
 
