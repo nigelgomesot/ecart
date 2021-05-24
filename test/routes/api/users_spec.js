@@ -32,13 +32,22 @@ describe('Users', function() {
         .end((err, res) => {
           expect(err).to.be.null
           expect(res).to.have.status(201)
+          expect(res.body.user.username).to.eql('testuser')
+
+          // REF: https://stackabuse.com/encoding-and-decoding-base64-strings-in-node-js/
+          const token = res.body.user.token,
+                tokenPayload = token.split('.')[1],
+                payloadBuffer = new Buffer(tokenPayload, 'base64'),
+                payloadStr = payloadBuffer.toString('ascii')
+                payloadJson = JSON.parse(payloadStr)
+
+          expect(payloadJson.username).to.eql('testuser')
 
           User.findOne({username: 'testuser'}).then(dbUser => {
             expect(dbUser.email).to.eql('testuser@test.com')
             expect(dbUser.username).to.eql('testuser')
             expect(dbUser.validPassword('test123456')).to.be.true
 
-            // PENDING: validate response body
             done()
           }).catch(err => done(err))
         })
