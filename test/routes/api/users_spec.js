@@ -11,7 +11,7 @@ const User = mongoose.model('User')
 describe('Users', function() {
   beforeEach(function(done) {
     Promise.all([
-      User.deleteMany
+      User.deleteMany()
     ]).then(() => done())
       .catch((err) => done(err))
   })
@@ -47,6 +47,31 @@ describe('Users', function() {
             expect(dbUser.email).to.eql('testuser@test.com')
             expect(dbUser.username).to.eql('testuser')
             expect(dbUser.validPassword('test123456')).to.be.true
+
+            done()
+          }).catch(err => done(err))
+        })
+    })
+
+    it('returns error for invalid user details', function(done) {
+      let incomingUser = {
+        "user":{
+          "email":"testuser@test.com",
+          "password":"test123456",
+          "username":"testuser@"
+        }
+      }
+
+      chai.request(app)
+        .post('/api/users')
+        .send(incomingUser)
+        .end((err, res) => {
+          expect(err).to.be.null
+          expect(res).to.have.status(422)
+          expect(res.body.errors.username).to.eql('is invalid')
+
+          User.findOne({username: 'testuser'}).then(dbUser => {
+            expect(dbUser).to.be.null
 
             done()
           }).catch(err => done(err))
