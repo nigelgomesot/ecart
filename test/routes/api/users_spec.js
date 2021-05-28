@@ -77,5 +77,43 @@ describe('Users', function() {
           }).catch(err => done(err))
         })
     })
+
+    describe('when user already exist', function() {
+      beforeEach(function(done) {
+        const existingUser = new User()
+        existingUser.username = 'testuser'
+        existingUser.email = 'testuser@test.com'
+        existingUser.setPassword('test123456')
+
+        existingUser.save()
+          .then(() => {
+            this.existingUser =  existingUser
+            done()
+          }).catch(err => {
+            done(err)
+          })
+      })
+
+      it('returns error', function(done) {
+        let incomingUser = {
+          "user":{
+            "email":this.existingUser.email,
+            "password":"test123456",
+            "username": this.existingUser.username
+          }
+        }
+
+        chai.request(app)
+          .post('/api/users')
+          .send(incomingUser)
+          .end((err, res) => {
+            expect(err).to.be.null
+            expect(res).to.have.status(422)
+            expect(res.body.errors.username).to.eql('is already taken')
+
+            done()
+          })
+      })
+    })
   })
 })
