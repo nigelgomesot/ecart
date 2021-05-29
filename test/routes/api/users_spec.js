@@ -116,4 +116,50 @@ describe('Users', function() {
       })
     })
   })
+
+  describe('POST /api/users/login', function() {
+    describe('when user already exist', function() {
+      beforeEach(function(done) {
+        const existingUser = new User()
+        existingUser.username = 'testuser'
+        existingUser.email = 'testuser@test.com'
+        existingUser.setPassword('test123456')
+
+        existingUser.save()
+          .then(() => {
+            this.existingUser =  existingUser
+            done()
+          }).catch(err => {
+            done(err)
+          })
+      })
+
+      it('logs in the user', function(done) {
+        let incomingUser = {
+          "user": {
+            "email": this.existingUser.email,
+            "password": "test123456"
+          }
+        }
+
+        chai.request(app)
+          .post('/api/users/login')
+          .send(incomingUser)
+          .end((err, res) => {
+            expect(err).to.be.null
+            expect(res).to.have.status(200)
+
+            const token = res.body.user.token,
+                  tokenPayload = token.split('.')[1],
+                  payloadBuffer = new Buffer(tokenPayload, 'base64'),
+                  payloadStr = payloadBuffer.toString('ascii'),
+                  payloadJson =  JSON.parse(payloadStr)
+
+            expect(payloadJson.username).to.eql(this.existingUser.username)
+
+            done()
+          })
+      })
+    })
+  })
 })
